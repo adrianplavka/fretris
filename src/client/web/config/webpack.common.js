@@ -21,16 +21,16 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(['./src/client/web/.dist']),
         new HtmlWebpackPlugin({
-            title: 'Gittie',
-            template: './src/client/web/templates/workspace.ejs',
-            filename: 'workspace/index.html'
+            title: 'Fretris!',
+            template: './src/client/web/templates/index.ejs',
+            filename: 'index.html'
         })
     ],
     resolve: {
         extensions: [".tsx", ".ts", ".js"]
     },
     output: {
-        filename: 'workspace/bundle.js',
+        filename: 'bundle.js',
         path: path.resolve(__dirname, '../.dist')
     }
 };
