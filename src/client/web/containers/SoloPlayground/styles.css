@@ -44,3 +44,10 @@
     margin-left: 20px;
     color: white;
 }
+
+.playground-pause {
+    font-family: 'Lobster', sans-serif;
+    font-size: 18px;
+    margin-left: 20px;
+    color: #8d1818;
+}

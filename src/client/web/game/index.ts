@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import * as io from 'socket.io-client';
 
 import { store } from '../index';
-import { setScore } from '../actions/playground';
+import { setScore, setPause } from '../actions/playground';
 
 // shim layer with setTimeout fallback
 var requestAnimFrame = (function () {
@@ -488,6 +488,8 @@ export class SoloGame {
         this.speed = 1000;
         this.phase = SoloGame.gameState.playing;
         this.randomShapes = [];
+        store.dispatch(setPause(false));
+        store.dispatch(setScore(this.score));
 
         // kick off the render loop
         requestAnimFrame((function (self) {
@@ -620,10 +622,12 @@ export class SoloGame {
         if (this.phase == SoloGame.gameState.paused) {
             this.phase = SoloGame.gameState.playing;
             // Kick the render loop off again.
+            store.dispatch(setPause(false));
             this.draw();
         }
         else if (this.phase == SoloGame.gameState.playing) {
             this.phase = SoloGame.gameState.paused;
+            store.dispatch(setPause(true));
         }
     }
 
@@ -804,6 +808,7 @@ export class DuoGame {
 
     public newGame(currentShape: string, nextShape: string) {
         this.grid.clearGrid();
+        store.dispatch(setScore(0));
         this.phase = DuoGame.gameState.playing;
         this.currentShape = this.newShape(currentShape);
         this._nextShape = this.newShape(nextShape);
