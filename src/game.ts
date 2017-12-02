@@ -438,7 +438,6 @@ export class Game {
         this.grid = new Grid(16, 10, 20);
 
         this.io.on("connection", (sck) => {
-            console.log("someone joined the game of id", this.id);
             if (!this.player1) {
                 // Set the first player.
                 this.player1 = { id: sck.id, name: players.get(sck.id) };
@@ -568,9 +567,11 @@ export class Game {
     private togglePause() {
         if (this.phase == Game.gameState.paused) {
             this.phase = Game.gameState.playing;
+            this.io.emit("unpause");
         }
         else if (this.phase == Game.gameState.playing) {
             this.phase = Game.gameState.paused;
+            this.io.emit("pause");
         }
     }
 

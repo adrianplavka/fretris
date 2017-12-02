@@ -12,7 +12,7 @@ export default class Connection {
             : io("https://" + window.location.hostname);
 
         this.sck.on("connection", () => {
-            console.log("connected with id ", this.sck.id);
+            
         });
     }
 

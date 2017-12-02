@@ -48,7 +48,7 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, {}> 
                     <div className="playground-viewbar">
                         <canvas id="nextCanvas" width="135" height="135"></canvas>
                         <h2 className="playground-score">Score: {this.props.score}</h2>
-                        {this.props.pause ? <h2 className="playground-pause">Paused!</h2> : ""}
+                        {this.props.pause ? <h2 className="playground-pause animated infinite pulse">Paused!</h2> : ""}
                     </div>
                 </div>
             </div>

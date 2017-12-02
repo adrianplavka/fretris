@@ -61,7 +61,6 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
                 this.setState({ ...this.state, disabled: true });
                 connection.sck.emit("check room", this.idValue);
                 connection.sck.once("check room", (check: bool) => {
-                    console.log("Room status: " + check);
                     if (check) this.props.toDuo(this.usernameValue, this.idValue)
                     else this.setState({ ...this.state, disabled: false });
                 });

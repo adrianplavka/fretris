@@ -777,6 +777,14 @@ export class DuoGame {
         socket.on("score", (score) => {
             store.dispatch(setScore(score));
         });
+
+        socket.on("pause", () => {
+            store.dispatch(setPause(true));
+        });
+
+        socket.on("unpause", () => {
+            store.dispatch(setPause(false));
+        });
     }
 
     private shapeFinished(shape: string) {
@@ -809,6 +817,7 @@ export class DuoGame {
     public newGame(currentShape: string, nextShape: string) {
         this.grid.clearGrid();
         store.dispatch(setScore(0));
+        store.dispatch(setPause(false));
         this.phase = DuoGame.gameState.playing;
         this.currentShape = this.newShape(currentShape);
         this._nextShape = this.newShape(nextShape);

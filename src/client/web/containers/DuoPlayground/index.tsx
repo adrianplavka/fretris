@@ -15,6 +15,7 @@ namespace DuoPlayground {
 
     export interface StateProps {
         score: number;
+        pause: bool;
     }
 
     export type Props = OwnProps & StateProps;
@@ -22,7 +23,8 @@ namespace DuoPlayground {
 
 function mapStateToProps(state: RootState) {
     return {
-        score: state.playground.score
+        score: state.playground.score,
+        pause: state.playground.pause
     };
 }
 
@@ -55,6 +57,7 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, {}> {
                     <div className="playground-viewbar">
                         <canvas id="nextCanvas" width="135" height="135"></canvas>
                         <h2 className="playground-score">Score: {this.props.score}</h2>
+                        {this.props.pause ? <h2 className="playground-pause animated infinite pulse">Paused!</h2> : ""}
                     </div>
                 </div>
             </div>
