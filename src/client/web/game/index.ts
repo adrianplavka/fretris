@@ -481,11 +481,10 @@ export class SoloGame {
         this.nextShape = _.cloneDeep(this._nextShape)
         this.showNextShape();
 
-        this.score = 0;
         this.rowsCompleted = 0;
         this.score = 0;
         this.level = -1;
-        this.speed = 1000;
+        this.speed = 900;
         this.phase = SoloGame.gameState.playing;
         this.randomShapes = [];
         store.dispatch(setPause(false));
@@ -632,9 +631,10 @@ export class SoloGame {
     }
 
     private incrementLevel() {
-        this.level++;
-        if (this.level < 10) {
-            this.speed = 1000 - (this.level * 100);
+        if (this.level < 7) {
+            this.level++;
+            this.speed -= 100;
+
             clearTimeout(this.timerToken);
             this.timerToken = window.setInterval((function (self) {
                 return function () { self.gameTimer(); };

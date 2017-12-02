@@ -538,30 +538,32 @@ class Game {
                 sck.disconnect();
             }
             sck.on("move", (move) => {
-                var points = [];
-                switch (move) {
-                    case "right":
-                        points = this.currentShape.moveRight();
-                        break;
-                    case "left":
-                        points = this.currentShape.moveLeft();
-                        break;
-                    case "up":
-                        points = this.currentShape.rotate(true);
-                        break;
-                    case "down":
-                        points = this.currentShape.drop();
-                        break;
-                }
-                if (this.grid.isPosValid(points)) {
-                    if (move === "down") {
-                        clearTimeout(this.timerToken);
-                        this.timerToken = setInterval(() => {
-                            this.gameTimer();
-                        }, this.speed);
+                if (this.phase == Game.gameState.playing) {
+                    var points = [];
+                    switch (move) {
+                        case "right":
+                            points = this.currentShape.moveRight();
+                            break;
+                        case "left":
+                            points = this.currentShape.moveLeft();
+                            break;
+                        case "up":
+                            points = this.currentShape.rotate(true);
+                            break;
+                        case "down":
+                            points = this.currentShape.drop();
+                            break;
                     }
-                    this.currentShape.setPos(points);
-                    io.emit("move", move);
+                    if (this.grid.isPosValid(points)) {
+                        if (move === "down") {
+                            clearTimeout(this.timerToken);
+                            this.timerToken = setInterval(() => {
+                                this.gameTimer();
+                            }, this.speed);
+                        }
+                        this.currentShape.setPos(points);
+                        io.emit("move", move);
+                    }
                 }
             });
             sck.on("start game", () => {
@@ -572,10 +574,6 @@ class Game {
             });
             sck.on("increment level", () => {
                 this.incrementLevel();
-                clearTimeout(this.timerToken);
-                this.timerToken = setInterval(() => {
-                    this.gameTimer();
-                }, this.speed);
             });
         });
     }
@@ -586,7 +584,7 @@ class Game {
         this.score = 0;
         this.rowsCompleted = 0;
         this.level = -1;
-        this.speed = 1000;
+        this.speed = 900;
         this.phase = Game.gameState.playing;
         this.randomShapes = [];
         this.incrementLevel();
@@ -629,14 +627,14 @@ class Game {
         }
     }
     incrementLevel() {
-        this.level++;
-        if (this.level < 10) {
-            this.speed = 1000 - (this.level * 100);
+        if (this.level < 7) {
+            this.level++;
+            this.speed -= 100;
+            clearTimeout(this.timerToken);
+            this.timerToken = setInterval((function (self) {
+                return function () { self.gameTimer(); };
+            })(this), this.speed);
         }
-        clearTimeout(this.timerToken);
-        this.timerToken = setInterval((function (self) {
-            return function () { self.gameTimer(); };
-        })(this), this.speed);
     }
     togglePause() {
         if (this.phase == Game.gameState.paused) {
