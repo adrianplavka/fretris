@@ -135,7 +135,7 @@ module.exports = require("socket.io");
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __webpack_require__(0);
 const port = 8000;
-app_1.server.listen(port);
+app_1.server.listen(process.env.PORT || port);
 console.clear() || console.log("<Tetris Online> @ Index > Started on port", port);
 
 
