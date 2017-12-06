@@ -468,13 +468,6 @@ export class Game {
                             break;
                     }
                     if (this.grid.isPosValid(points)) {
-                        if (move === "down") {
-                            clearTimeout(this.timerToken);
-                            this.timerToken = setInterval(() => {
-                                this.gameTimer();
-                            }, this.speed);
-                        }
-
                         this.currentShape.setPos(points);
                         io.emit("move", move);
                     }
