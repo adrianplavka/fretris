@@ -714,24 +714,31 @@ export class SoloGame {
 }
 
 export class DuoGame {
-    private canvas: HTMLCanvasElement;
-    private nextCanvas: HTMLCanvasElement;
-    private context: CanvasRenderingContext2D;
-    private running: boolean = false;
-    private currentShape: Shape;
-    private nextShape: Shape;
-    private _nextShape: Shape;
-    private grid: Grid;
-    private nextGrid: Grid;
+    public canvas: HTMLCanvasElement;
+    public nextCanvas: HTMLCanvasElement;
+    public context: CanvasRenderingContext2D;
+    public running: boolean = false;
+    public currentShape: Shape;
+    public nextShape: Shape;
+    public _nextShape: Shape;
+    public grid: Grid;
+    public nextGrid: Grid;
     static gameState = { initial: 0, playing: 1, paused: 2, gameover: 3 };
-    private phase = DuoGame.gameState.initial;
-    private score: number;
-    private socket: SocketIOClient.Socket;
+    public phase = DuoGame.gameState.initial;
+    public score: number;
+    public socket: SocketIOClient.Socket;
+    public mine: bool;
 
-    constructor(socket: SocketIOClient.Socket) {
+    constructor(socket: SocketIOClient.Socket, mine: bool) {
         this.socket = socket;
-        this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
-        this.nextCanvas = document.getElementById('nextCanvas') as HTMLCanvasElement;
+        this.mine = mine;
+        if (this.mine) {
+            this.canvas = document.getElementById('myGameCanvas') as HTMLCanvasElement;
+            this.nextCanvas = document.getElementById('myNextCanvas') as HTMLCanvasElement;
+        } else {
+            this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
+            this.nextCanvas = document.getElementById('nextCanvas') as HTMLCanvasElement;
+        }
         this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
         this.grid = new Grid(16, 10, 20, '#f5f5f5', this.canvas);
         this.nextGrid = new Grid(16, 10, 20, '#f5f5f5', this.nextCanvas);
@@ -739,55 +746,12 @@ export class DuoGame {
         this.nextGrid.eraseGrid();
         this.keyhandler = this.keyhandler.bind(this);
         var x = this;
-        document.onkeydown = this.keyhandler;
-
-        socket.on("start game", (start) => {
-            this.newGame(start.currentShape, start.nextShape);
-        });
-
-        socket.on("move", (move: string) => {
-            var points: Point[] = [];
-            switch (move) {
-                case "right":
-                    points = this.currentShape.moveRight();
-                    break;
-                case "left":
-                    points = this.currentShape.moveLeft();
-                    break;
-                case "up":
-                    points = this.currentShape.rotate(true);
-                    break;
-                case "down":
-                    points = this.currentShape.drop();
-                    break;
-            }
-            if (this.grid.isPosValid(points)) {
-                this.currentShape.setPos(points);
-            }
-        });
-
-        socket.on("tick", () => {
-            this.currentShape.setPos(this.currentShape.drop());
-        });
-
-        socket.on("shape finished", (shape) => {
-            this.shapeFinished(shape);
-        });
-
-        socket.on("score", (score) => {
-            store.dispatch(setScore(score));
-        });
-
-        socket.on("pause", () => {
-            store.dispatch(setPause(true));
-        });
-
-        socket.on("unpause", () => {
-            store.dispatch(setPause(false));
-        });
+        if (mine) {
+            document.onkeydown = this.keyhandler;
+        }
     }
 
-    private shapeFinished(shape: string) {
+    public shapeFinished(shape: string) {
         if (this.grid.addShape(this.currentShape)) {
             this.grid.draw(this.currentShape);
             const completed = this.grid.checkRows(this.currentShape); // and erase them

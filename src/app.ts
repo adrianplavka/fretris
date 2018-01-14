@@ -4,7 +4,7 @@ import * as Express from 'express';
 import * as http from 'http';
 import * as socket from 'socket.io';
 
-import { Game } from './game';
+import { GameNamespace } from './game';
 
 export const app = Express();
 export const server = http.createServer(app);
@@ -30,7 +30,7 @@ app.get("/", (req, res) => {
 });
 
 export const players: Map<str, str> = new Map();
-const games: Map<str, Game> = new Map();
+const games: Map<str, GameNamespace> = new Map();
 
 io.on("connection", (sck) => {
     sck.emit("connection");
@@ -56,7 +56,7 @@ io.on("connection", (sck) => {
     sck.on("create room", () => {
         const id = Math.random().toString(36).substr(2, 10);
         const nsp = io.of(id);
-        games.set(id, new Game(id, nsp));
+        games.set(id, new GameNamespace(id, nsp));
         sck.emit("create room", id);
     });
 });

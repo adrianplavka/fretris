@@ -65,10 +65,11 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
                     else this.setState({ ...this.state, disabled: false });
                 });
             } else {
+                console.log("ASDAF");
+                connection.sck.emit("create room", connection.sck.id);
                 connection.sck.once("create room", (id: string) => {
                     this.props.toDuo(this.usernameValue, id);
                 });
-                connection.sck.emit("create room", connection.sck.id);
             }
         }
     }

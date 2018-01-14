@@ -114,7 +114,7 @@ exports.io.on("connection", (sck) => {
     sck.on("create room", () => {
         const id = Math.random().toString(36).substr(2, 10);
         const nsp = exports.io.of(id);
-        games.set(id, new game_1.Game(id, nsp));
+        games.set(id, new game_1.GameNamespace(id, nsp));
         sck.emit("create room", id);
     });
 });
@@ -514,68 +514,79 @@ class Grid {
     }
 }
 exports.Grid = Grid;
-class Game {
+class GameNamespace {
     constructor(id, io) {
-        this.phase = Game.gameState.initial;
-        this.randomShapes = [];
-        this.running = false;
-        this.io = io;
         this.id = id;
-        this.speed = 1000;
-        this.grid = new Grid(16, 10, 20);
+        this.io = io;
+        this.game1 = new Game(io);
+        this.game2 = new Game(io);
+        this.games = new Map();
         this.io.on("connection", (sck) => {
             if (!this.player1) {
                 // Set the first player.
                 this.player1 = { id: sck.id, name: app_1.players.get(sck.id) };
+                this.games[sck.id] = this.game1;
+                this.game1.id = sck.id;
             }
             else if (!this.player2) {
                 // Set the second player & start the game.
                 this.player2 = { id: sck.id, name: app_1.players.get(sck.id) };
-                this.startGame();
+                this.games[sck.id] = this.game2;
+                this.game2.id = sck.id;
+                this.game1.startGame();
+                this.game2.startGame();
             }
             else {
                 // Can't join a full room.
                 sck.disconnect();
             }
             sck.on("move", (move) => {
-                if (this.phase == Game.gameState.playing) {
+                if (this.games[sck.id].phase == Game.gameState.playing) {
                     var points = [];
                     switch (move) {
                         case "right":
-                            points = this.currentShape.moveRight();
+                            points = this.games[sck.id].currentShape.moveRight();
                             break;
                         case "left":
-                            points = this.currentShape.moveLeft();
+                            points = this.games[sck.id].currentShape.moveLeft();
                             break;
                         case "up":
-                            points = this.currentShape.rotate(true);
+                            points = this.games[sck.id].currentShape.rotate(true);
                             break;
                         case "down":
-                            points = this.currentShape.drop();
+                            points = this.games[sck.id].currentShape.drop();
                             break;
                     }
-                    if (this.grid.isPosValid(points)) {
-                        if (move === "down") {
-                            clearTimeout(this.timerToken);
-                            this.timerToken = setInterval(() => {
-                                this.gameTimer();
-                            }, this.speed);
-                        }
-                        this.currentShape.setPos(points);
-                        io.emit("move", move);
+                    if (this.games[sck.id].grid.isPosValid(points)) {
+                        this.games[sck.id].currentShape.setPos(points);
+                        io.emit("move", move, sck.id);
                     }
                 }
             });
             sck.on("start game", () => {
-                this.startGame();
+                this.game1.startGame();
+                this.game2.startGame();
             });
             sck.on("toggle pause", () => {
-                this.togglePause();
+                this.game1.togglePause();
+                this.game2.togglePause();
             });
             sck.on("increment level", () => {
-                this.incrementLevel();
+                this.game1.incrementLevel();
+                this.game2.incrementLevel();
             });
         });
+    }
+}
+exports.GameNamespace = GameNamespace;
+class Game {
+    constructor(io) {
+        this.phase = Game.gameState.initial;
+        this.randomShapes = [];
+        this.running = false;
+        this.io = io;
+        this.speed = 1000;
+        this.grid = new Grid(16, 10, 20);
     }
     startGame() {
         this.grid.clearGrid();
@@ -588,7 +599,7 @@ class Game {
         this.phase = Game.gameState.playing;
         this.randomShapes = [];
         this.incrementLevel();
-        this.io.emit("start game", { currentShape: this.currentShape.s, nextShape: this.nextShape.s });
+        this.io.emit("start game", { currentShape: this.currentShape.s, nextShape: this.nextShape.s }, this.id);
         clearTimeout(this.timerToken);
         this.timerToken = setInterval(() => {
             this.gameTimer();
@@ -599,7 +610,7 @@ class Game {
             var points = this.currentShape.drop();
             if (this.grid.isPosValid(points)) {
                 this.currentShape.setPos(points);
-                this.io.emit("tick");
+                this.io.emit("tick", this.id);
             }
             else {
                 this.shapeFinished();
@@ -617,8 +628,8 @@ class Game {
             }
             this.currentShape = this.nextShape;
             this.nextShape = this.newShape();
-            this.io.emit("shape finished", this.nextShape.s);
-            this.io.emit("score", this.score);
+            this.io.emit("shape finished", this.nextShape.s, this.id);
+            this.io.emit("score", this.score, this.id);
         }
         else {
             // Game over!
@@ -639,11 +650,11 @@ class Game {
     togglePause() {
         if (this.phase == Game.gameState.paused) {
             this.phase = Game.gameState.playing;
-            this.io.emit("unpause");
+            this.io.emit("unpause", this.id);
         }
         else if (this.phase == Game.gameState.playing) {
             this.phase = Game.gameState.paused;
-            this.io.emit("pause");
+            this.io.emit("pause", this.id);
         }
     }
     newShape() {

@@ -410,85 +410,108 @@ export class Grid {
     }
 }
 
-export class Game {
-    private id: string;
+export class GameNamespace {
+    private id: str;
     private io: SocketIO.Namespace;
 
     public player1: { id: string, name: string };
     public player2: { id: string, name: string };
+    private game1: Game;
+    private game2: Game;
+    private games: Map<str, Game>;
 
-    private currentShape: Shape;
-    private nextShape: Shape;
-    private grid: Grid;
-    private nextGrid: Grid;
-    private speed: number; // in milliseconds
-    private level: number;
-    private rowsCompleted: number;
-    static gameState = { initial: 0, playing: 1, paused: 2, gameover: 3 };
-    private phase = Game.gameState.initial;
-    private score: number;
-    private randomShapes: string[] = [];
-    private timerToken: NodeJS.Timer;
-    private running: boolean = false;
-
-    constructor(id: string, io: SocketIO.Namespace) {
-        this.io = io;
+    constructor(id: str, io: SocketIO.Namespace) {
         this.id = id;
-        this.speed = 1000;
-        this.grid = new Grid(16, 10, 20);
+        this.io = io;
+        this.game1 = new Game(io);
+        this.game2 = new Game(io);
+        this.games = new Map();
 
         this.io.on("connection", (sck) => {
             if (!this.player1) {
                 // Set the first player.
                 this.player1 = { id: sck.id, name: players.get(sck.id) };
+                this.games[sck.id] = this.game1;
+                this.game1.id = sck.id;
             } else if (!this.player2) {
                 // Set the second player & start the game.
                 this.player2 = { id: sck.id, name: players.get(sck.id) };
-                this.startGame();
+                this.games[sck.id] = this.game2;
+                this.game2.id = sck.id;
+                this.game1.startGame();
+                this.game2.startGame();
             } else {
                 // Can't join a full room.
                 sck.disconnect();
             }
 
             sck.on("move", (move: string) => {
-                if (this.phase == Game.gameState.playing) {
+                if (this.games[sck.id].phase == Game.gameState.playing) {
                     var points: Point[] = [];
                     switch (move) {
                         case "right":
-                            points = this.currentShape.moveRight();
+                            points = this.games[sck.id].currentShape.moveRight();
                             break;
                         case "left":
-                            points = this.currentShape.moveLeft();
+                            points = this.games[sck.id].currentShape.moveLeft();
                             break;
                         case "up":
-                            points = this.currentShape.rotate(true);
+                            points = this.games[sck.id].currentShape.rotate(true);
                             break;
                         case "down":
-                            points = this.currentShape.drop();
+                            points = this.games[sck.id].currentShape.drop();
                             break;
                     }
-                    if (this.grid.isPosValid(points)) {
-                        this.currentShape.setPos(points);
-                        io.emit("move", move);
+                    if (this.games[sck.id].grid.isPosValid(points)) {
+                        this.games[sck.id].currentShape.setPos(points);
+                        io.emit("move", move, sck.id);
                     }
                 }
             });
 
             sck.on("start game", () => {
-                this.startGame();
+                this.game1.startGame();
+                this.game2.startGame();
             });
 
             sck.on("toggle pause", () => {
-                this.togglePause();
+                this.game1.togglePause();
+                this.game2.togglePause();
             });
 
             sck.on("increment level", () => {
-                this.incrementLevel();
+                this.game1.incrementLevel();
+                this.game2.incrementLevel();
             });
         });
     }
+}
 
-    private startGame() {
+export class Game {
+    private io: SocketIO.Namespace;
+    public id: str;
+
+    public currentShape: Shape;
+    public nextShape: Shape;
+    public grid: Grid;
+    public nextGrid: Grid;
+    public speed: number; // in milliseconds
+    public level: number;
+    public rowsCompleted: number;
+    static gameState = { initial: 0, playing: 1, paused: 2, gameover: 3 };
+    public phase = Game.gameState.initial;
+    public score: number;
+    public randomShapes: string[] = [];
+    public timerToken: NodeJS.Timer;
+    public running: boolean = false;
+
+    constructor(io: SocketIO.Namespace) {
+        this.io = io;
+        this.speed = 1000;
+        this.grid = new Grid(16, 10, 20);
+    }
+
+    public startGame() {
         this.grid.clearGrid();
         this.currentShape = this.newShape();
         this.nextShape = this.newShape();
@@ -501,19 +524,19 @@ export class Game {
         this.randomShapes = [];
 
         this.incrementLevel();
-        this.io.emit("start game", { currentShape: this.currentShape.s, nextShape: this.nextShape.s });
+        this.io.emit("start game", { currentShape: this.currentShape.s, nextShape: this.nextShape.s }, this.id);
         clearTimeout(this.timerToken);
         this.timerToken = setInterval(() => {
             this.gameTimer();
         }, this.speed);
     }
 
-    private gameTimer() {
+    public gameTimer() {
         if (this.phase == Game.gameState.playing) {
             var points = this.currentShape.drop();
             if (this.grid.isPosValid(points)) {
                 this.currentShape.setPos(points);
-                this.io.emit("tick");
+                this.io.emit("tick", this.id);
             }
             else {
                 this.shapeFinished();
@@ -521,7 +544,7 @@ export class Game {
         }
     }
 
-    private shapeFinished() {
+    public shapeFinished() {
         if (this.grid.addShape(this.currentShape)) {
             this.grid.draw(this.currentShape);
             const completed = this.grid.checkRows(this.currentShape); // and erase them
@@ -534,8 +557,8 @@ export class Game {
 
             this.currentShape = this.nextShape;
             this.nextShape = this.newShape();
-            this.io.emit("shape finished", this.nextShape.s);
-            this.io.emit("score", this.score);
+            this.io.emit("shape finished", this.nextShape.s, this.id);
+            this.io.emit("score", this.score, this.id);
         }
         else {
             // Game over!
@@ -544,7 +567,7 @@ export class Game {
         }
     }
 
-    private incrementLevel() {
+    public incrementLevel() {
         if (this.level < 7) {
             this.level++;
             this.speed -= 100;
@@ -556,18 +579,18 @@ export class Game {
         }
     }
 
-    private togglePause() {
+    public togglePause() {
         if (this.phase == Game.gameState.paused) {
             this.phase = Game.gameState.playing;
-            this.io.emit("unpause");
+            this.io.emit("unpause", this.id);
         }
         else if (this.phase == Game.gameState.playing) {
             this.phase = Game.gameState.paused;
-            this.io.emit("pause");
+            this.io.emit("pause", this.id);
         }
     }
 
-    private newShape() {
+    public newShape() {
         if (this.randomShapes.length === 0) {
             this.randomShapes = [
                 'L', 'L', 'L', 'L',
