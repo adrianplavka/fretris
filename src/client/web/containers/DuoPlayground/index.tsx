@@ -20,6 +20,11 @@ namespace DuoPlayground {
         pause: bool;
     }
 
+    export interface State {
+        myScore: number;
+        otherScore: number;
+    }
+
     export type Props = OwnProps & StateProps;
 }
 
@@ -36,80 +41,61 @@ function mapDispatchToProps(dispatch: any) {
     };
 }
 
-class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, {}> {
+class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPlayground.State> {
+    constructor(props) {
+        super(props);
+        this.state = { myScore: 0, otherScore: 0 };
+    }
+
     componentDidMount() {
         const connection = new GameConnection(this.props.id);
         const myGame = new Tetris(connection.sck, true);
         const otherGame = new Tetris(connection.sck, false);
 
         connection.sck.on("start game", (start, id) => {
-            if (connection.sck.id === id) {
-                myGame.newGame(start.currentShape, start.nextShape);
-            } else {
-                otherGame.newGame(start.currentShape, start.nextShape);
-            }
+            const game = connection.sck.id === id ? myGame : otherGame;
+            game.newGame(start.currentShape, start.nextShape);
         });
 
         connection.sck.on("move", (move: string, id: str) => {
-            if (connection.sck.id === id) {
-                var points: Point[] = [];
-                switch (move) {
-                    case "right":
-                        points = myGame.currentShape.moveRight();
-                        break;
-                    case "left":
-                        points = myGame.currentShape.moveLeft();
-                        break;
-                    case "up":
-                        points = myGame.currentShape.rotate(true);
-                        break;
-                    case "down":
-                        points = myGame.currentShape.drop();
-                        break;
-                }
-                if (myGame.grid.isPosValid(points)) {
-                    myGame.currentShape.setPos(points);
-                }
-            } else {
-                var points: Point[] = [];
-                switch (move) {
-                    case "right":
-                        points = otherGame.currentShape.moveRight();
-                        break;
-                    case "left":
-                        points = otherGame.currentShape.moveLeft();
-                        break;
-                    case "up":
-                        points = otherGame.currentShape.rotate(true);
-                        break;
-                    case "down":
-                        points = otherGame.currentShape.drop();
-                        break;
-                }
-                if (otherGame.grid.isPosValid(points)) {
-                    otherGame.currentShape.setPos(points);
-                }
+            const game = connection.sck.id === id ? myGame : otherGame;
+
+            var points: Point[] = [];
+            switch (move) {
+                case "right":
+                    points = game.currentShape.moveRight();
+                    break;
+                case "left":
+                    points = game.currentShape.moveLeft();
+                    break;
+                case "up":
+                    points = game.currentShape.rotate(true);
+                    break;
+                case "down":
+                    points = game.currentShape.drop();
+                    break;
+            }
+            if (game.grid.isPosValid(points)) {
+                game.currentShape.setPos(points);
             }
         });
 
         connection.sck.on("tick", (id: str) => {
-            if (connection.sck.id === id) {
-                myGame.currentShape.setPos(myGame.currentShape.drop());
-            } else {
-                otherGame.currentShape.setPos(otherGame.currentShape.drop());
-            }
+            const game = connection.sck.id === id ? myGame : otherGame;
+            game.currentShape.setPos(game.currentShape.drop());
         });
 
         connection.sck.on("shape finished", (shape, id) => {
-            if (connection.sck.id === id) {
-                myGame.shapeFinished(shape);
-            } else {
-                otherGame.shapeFinished(shape);
-            }
+            const game = connection.sck.id === id ? myGame : otherGame;
+            game.shapeFinished(shape);
         });
 
-        connection.sck.on("score", (score) => {
-            store.dispatch(setScore(score));
+        connection.sck.on("score", (score, id) => {
+            if (connection.sck.id === id) {
+                this.setState({ ...this.state, myScore: score });
+            } else {
+                this.setState({ ...this.state, otherScore: score });
+            }
         });
 
         connection.sck.on("pause", () => {
@@ -136,14 +122,14 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, {}> {
                 <div className="playground">
                     <div className="playground-viewbar">
                         <canvas id="myNextCanvas" width="135" height="135"></canvas>
-                        <h2 className="playground-score">Score: {this.props.score}</h2>
+                        <h2 className="playground-score">Score: {this.state.myScore}</h2>
                         {this.props.pause ? <h2 className="playground-pause animated infinite pulse">Paused!</h2> : ""}
                     </div>
                     <canvas id="myGameCanvas" width="240" height="360"></canvas>
                     <canvas id="gameCanvas" width="240" height="360"></canvas>
                     <div className="playground-viewbar">
                         <canvas id="nextCanvas" width="135" height="135"></canvas>
-                        <h2 className="playground-score">Score: {this.props.score}</h2>
+                        <h2 className="playground-score">Score: {this.state.otherScore}</h2>
                         {this.props.pause ? <h2 className="playground-pause animated infinite pulse">Paused!</h2> : ""}
                     </div>
                 </div>
