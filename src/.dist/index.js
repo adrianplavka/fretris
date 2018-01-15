@@ -112,7 +112,7 @@ exports.io.on("connection", (sck) => {
         sck.emit("check room", check);
     });
     sck.on("create room", () => {
-        const id = Math.random().toString(36).substr(2, 10);
+        const id = Math.random().toString(36).substr(2, 5);
         const nsp = exports.io.of(id);
         games.set(id, new game_1.GameNamespace(id, nsp));
         sck.emit("create room", id);

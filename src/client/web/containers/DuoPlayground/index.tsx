@@ -7,6 +7,7 @@ import { setScore, setPause } from '../../actions/playground';
 import { store } from '../../index';
 import { DuoGame as Tetris, Point } from '../../game';
 import { RootState } from '../../reducers/store';
+import { mobileCheck } from '../../utils';
 import './styles.css';
 
 namespace DuoPlayground {
@@ -20,12 +21,12 @@ namespace DuoPlayground {
         pause: bool;
     }
 
+    export type Props = OwnProps & StateProps;
+
     export interface State {
         myScore: number;
         otherScore: number;
     }
-
-    export type Props = OwnProps & StateProps;
 }
 
 function mapStateToProps(state: RootState) {
@@ -42,23 +43,29 @@ function mapDispatchToProps(dispatch: any) {
 }
 
 class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPlayground.State> {
-    constructor(props) {
+    private connection: GameConnection;
+    private myGame: Tetris;
+    private otherGame: Tetris;
+    private isMobile: bool;
+
+    constructor(props: DuoPlayground.Props) {
         super(props);
         this.state = { myScore: 0, otherScore: 0 };
+        this.connection = new GameConnection(this.props.id);
+        this.isMobile = mobileCheck();
     }
 
     componentDidMount() {
-        const connection = new GameConnection(this.props.id);
-        const myGame = new Tetris(connection.sck, true);
-        const otherGame = new Tetris(connection.sck, false);
+        this.myGame = new Tetris(this.connection.sck, true);
+        this.otherGame = new Tetris(this.connection.sck, false);
 
-        connection.sck.on("start game", (start, id) => {
-            const game = connection.sck.id === id ? myGame : otherGame;
+        this.connection.sck.on("start game", (start, id) => {
+            const game = this.connection.sck.id === id ? this.myGame : this.otherGame;
             game.newGame(start.currentShape, start.nextShape);
         });
 
-        connection.sck.on("move", (move: string, id: str) => {
-            const game = connection.sck.id === id ? myGame : otherGame;
+        this.connection.sck.on("move", (move: string, id: str) => {
+            const game = this.connection.sck.id === id ? this.myGame : this.otherGame;
 
             var points: Point[] = [];
             switch (move) {
@@ -80,29 +87,29 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
             }
         });
 
-        connection.sck.on("tick", (id: str) => {
-            const game = connection.sck.id === id ? myGame : otherGame;
+        this.connection.sck.on("tick", (id: str) => {
+            const game = this.connection.sck.id === id ? this.myGame : this.otherGame;
             game.currentShape.setPos(game.currentShape.drop());
         });
 
-        connection.sck.on("shape finished", (shape, id) => {
-            const game = connection.sck.id === id ? myGame : otherGame;
+        this.connection.sck.on("shape finished", (shape, id) => {
+            const game = this.connection.sck.id === id ? this.myGame : this.otherGame;
             game.shapeFinished(shape);
         });
 
-        connection.sck.on("score", (score, id) => {
-            if (connection.sck.id === id) {
+        this.connection.sck.on("score", (score, id) => {
+            if (this.connection.sck.id === id) {
                 this.setState({ ...this.state, myScore: score });
             } else {
                 this.setState({ ...this.state, otherScore: score });
             }
         });
 
-        connection.sck.on("pause", () => {
+        this.connection.sck.on("pause", () => {
             store.dispatch(setPause(true));
         });
 
-        connection.sck.on("unpause", () => {
+        this.connection.sck.on("unpause", () => {
             store.dispatch(setPause(false));
         });
     }
