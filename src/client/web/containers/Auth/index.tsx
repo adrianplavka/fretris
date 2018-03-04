@@ -65,7 +65,6 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
                     else this.setState({ ...this.state, disabled: false });
                 });
             } else {
-                console.log("ASDAF");
                 connection.sck.emit("create room", connection.sck.id);
                 connection.sck.once("create room", (id: string) => {
                     this.props.toDuo(this.usernameValue, id);
@@ -173,7 +172,7 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
                     <span className="auth-space" />
                     Play!
                 </button>
-                <footer><i className="fa fa-code" aria-hidden="true" /> with <i className="fa fa-heart" aria-hidden="true" /> for Freddie.</footer>
+                <footer><i className="fa fa-code" aria-hidden="true" /> with <i className="fa fa-heart" aria-hidden="true" /> for the boys, who were there for me.</footer>
             </div>
         );
     }

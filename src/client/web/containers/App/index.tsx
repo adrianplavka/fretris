@@ -44,7 +44,7 @@ export class AppComponent extends React.Component<AppComponent.Props, {}> {
     }
 
     render() {
-        return this.props.context;
+        return <div id="main-container">{this.props.context}</div>;
     }
 }
 

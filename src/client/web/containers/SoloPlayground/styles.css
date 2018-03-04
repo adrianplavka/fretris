@@ -1,4 +1,9 @@
 
+#solo-playground {
+    display: flex;
+    flex-direction: column;
+}
+
 .playground {
     display: flex;
     flex-direction: row;
@@ -50,4 +55,22 @@
     font-size: 18px;
     margin-left: 20px;
     color: #8d1818;
+}
+
+/* Low Resolution Tablets, Mobiles (Landscape) */
+@media screen and (min-width: 481px) and (max-width: 767px) {
+    #solo-playground {
+        -ms-transform: scale(0.7, 0.7);
+        -webkit-transform: scale(0.7, 0.7);
+        transform: scale(0.7, 0.7);
+    }
+}
+
+/* Most of the Smartphones Mobiles (Portrait) */
+@media screen and (min-width: 320px) and (max-width: 480px) {
+    #solo-playground {
+        -ms-transform: scale(0.7, 0.7);
+        -webkit-transform: scale(0.7, 0.7);
+        transform: scale(0.7, 0.7);
+    }
 }

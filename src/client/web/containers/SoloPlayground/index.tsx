@@ -78,20 +78,22 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, {}> 
     render() {
         return (
             <div className="container animated fadeIn">
-                <div className="playground-header">
-                    <h1 className="playground-title animated infinite pulse">
-                        Fretris!
-                    </h1>
-                    <h3 className="playground-mode">
-                        Solo Mode
-                    </h3>
-                </div>
-                <div className="playground">
-                    <canvas id="gameCanvas" width="240" height="360"></canvas>
-                    <div className="playground-viewbar">
-                        <canvas id="nextCanvas" width="135" height="135"></canvas>
-                        <h2 className="playground-score">Score: {this.props.score}</h2>
-                        {this.props.pause ? <h2 className="playground-pause animated infinite pulse">Paused!</h2> : ""}
+                <div id="solo-playground">
+                    <div className="playground-header">
+                        <h1 className="playground-title animated infinite pulse">
+                            Fretris!
+                        </h1>
+                        <h3 className="playground-mode">
+                            Solo Mode
+                        </h3>
+                    </div>
+                    <div className="playground">
+                        <canvas id="gameCanvas" width="240" height="360"></canvas>
+                        <div className="playground-viewbar">
+                            <canvas id="nextCanvas" width="135" height="135"></canvas>
+                            <h2 className="playground-score">Score: {this.props.score}</h2>
+                            {this.props.pause ? <h2 className="playground-pause animated infinite pulse">Paused!</h2> : ""}
+                        </div>
                     </div>
                 </div>
             </div>
