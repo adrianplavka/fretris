@@ -158,27 +158,29 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
     render() {
         return (
             <div className="container animated fadeIn">
-                <div className="playground-header">
-                    <h1 className="playground-title animated infinite pulse">
-                        Fretris!
-                    </h1>
-                    <h3 className="playground-mode">
-                        Duo Mode
-                    </h3>
-                </div>
-                <h3 className="playground-id">ID: {this.props.id}</h3>
-                <div className="playground">
-                    <div className="playground-viewbar">
-                        <canvas id="myNextCanvas" width="135" height="135"></canvas>
-                        <h2 className="playground-score">Score: {this.state.myScore}</h2>
-                        {this.props.pause ? <h2 className="playground-pause animated infinite pulse">Paused!</h2> : ""}
+                <div id="duo-playground">
+                    <div className="playground-header">
+                        <h1 className="playground-title animated infinite pulse">
+                            Fretris!
+                        </h1>
+                        <h3 className="playground-mode">
+                            Duo Mode
+                        </h3>
                     </div>
-                    <canvas id="myGameCanvas" width="240" height="360"></canvas>
-                    <canvas id="gameCanvas" width="240" height="360"></canvas>
-                    <div className="playground-viewbar">
-                        <canvas id="nextCanvas" width="135" height="135"></canvas>
-                        <h2 className="playground-score">Score: {this.state.otherScore}</h2>
-                        {this.props.pause ? <h2 className="playground-pause animated infinite pulse">Paused!</h2> : ""}
+                    <h3 className="playground-id">ID: {this.props.id}</h3>
+                    <div className="playground">
+                        <div className="playground-viewbar">
+                            <canvas id="myNextCanvas" width="135" height="135"></canvas>
+                            <h2 className="playground-score">Score: {this.state.myScore}</h2>
+                            {this.props.pause ? <h2 className="playground-pause animated infinite pulse">Paused!</h2> : ""}
+                        </div>
+                        <canvas id="myGameCanvas" width="240" height="360"></canvas>
+                        <canvas id="gameCanvas" width="240" height="360"></canvas>
+                        <div className="playground-viewbar">
+                            <canvas id="nextCanvas" width="135" height="135"></canvas>
+                            <h2 className="playground-score">Score: {this.state.otherScore}</h2>
+                            {this.props.pause ? <h2 className="playground-pause animated infinite pulse">Paused!</h2> : ""}
+                        </div>
                     </div>
                 </div>
             </div>

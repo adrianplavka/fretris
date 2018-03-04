@@ -1,7 +1,30 @@
 
+#duo-playground {
+    display: flex;
+    flex-direction: column;
+}
+
 .playground-id {
     font-family: 'Noto Sans', sans-serif;
     color: white;
     font-size: 15px;
     margin: 0;
+}
+
+/* Low Resolution Tablets, Mobiles (Landscape) */
+@media screen and (min-width: 481px) and (max-width: 767px) {
+    #duo-playground {
+        -ms-transform: scale(0.7, 0.7);
+        -webkit-transform: scale(0.7, 0.7);
+        transform: scale(0.7, 0.7);
+    }
+}
+
+/* Most of the Smartphones Mobiles (Portrait) */
+@media screen and (min-width: 320px) and (max-width: 480px) {
+    #duo-playground {
+        -ms-transform: scale(0.7, 0.7);
+        -webkit-transform: scale(0.7, 0.7);
+        transform: scale(0.7, 0.7);
+    }
 }
