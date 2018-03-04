@@ -28,6 +28,8 @@ function mapDispatchToProps(dispatch: any) {
 }
 
 class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, {}> {
+    private swipeDelay: number = 0;
+
     componentDidMount() {
         const game = new Tetris();
         game.newGame();
@@ -38,17 +40,21 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, {}> 
         mc.add(new Hammer.Tap());
 
         mc.on('pan', (ev) => {
-            switch (ev.direction) {
-                case Hammer.DIRECTION_LEFT:
-                    game.moveLeft();
-                    break;
-                case Hammer.DIRECTION_RIGHT:
-                    game.moveRight();
-                    break;
-                default:
-                    game.moveDown();
-                    break;
+            if (this.swipeDelay >= 10) {
+                switch (ev.direction) {
+                    case Hammer.DIRECTION_LEFT:
+                        game.moveLeft();
+                        break;
+                    case Hammer.DIRECTION_RIGHT:
+                        game.moveRight();
+                        break;
+                    default:
+                        game.moveDown();
+                        break;
+                }
+                this.swipeDelay = 0;
             }
+            this.swipeDelay++;
         });
 
         mc.on('tap', (ev) => {
