@@ -47,6 +47,9 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
     private myGame: Tetris;
     private otherGame: Tetris;
     private isMobile: bool;
+    private swipeDelay: number = 0;
+    private readonly swipeDelayMax: number = 3;
+    private swipeAction: number;
 
     constructor(props: DuoPlayground.Props) {
         super(props);
@@ -58,6 +61,44 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
     componentDidMount() {
         this.myGame = new Tetris(this.connection.sck, true);
         this.otherGame = new Tetris(this.connection.sck, false);
+
+        // Setup swipe gestures.
+        var mc = new Hammer.Manager(document.getElementById("root"), {});
+        mc.add(new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, threshold: 10, posThreshold: 300 }));
+        mc.add(new Hammer.Tap());
+
+        mc.on('pan', (ev) => {
+            switch (ev.direction) {
+                case Hammer.DIRECTION_LEFT:
+                    if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_LEFT) {
+                        this.connection.sck.emit("move", "left");
+                        this.swipeDelay = 0;
+                    }
+                    this.swipeAction = Hammer.DIRECTION_LEFT;
+                    this.swipeDelay++;
+                    break;
+                case Hammer.DIRECTION_RIGHT:
+                    if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_RIGHT) {
+                        this.connection.sck.emit("move", "right");
+                        this.swipeDelay = 0;
+                    }
+                    this.swipeAction = Hammer.DIRECTION_RIGHT;
+                    this.swipeDelay++;
+                    break;
+                default:
+                    if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_DOWN) {
+                        this.connection.sck.emit("move", "down");
+                        this.swipeDelay = 0;
+                    }
+                    this.swipeAction = Hammer.DIRECTION_DOWN;
+                    this.swipeDelay++;
+                    break;
+            }
+        });
+
+        mc.on('tap', (ev) => {
+            this.connection.sck.emit("move", "up");
+        });
 
         this.connection.sck.on("start game", (start, id) => {
             const game = this.connection.sck.id === id ? this.myGame : this.otherGame;
