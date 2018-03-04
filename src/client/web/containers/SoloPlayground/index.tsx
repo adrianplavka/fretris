@@ -29,7 +29,7 @@ function mapDispatchToProps(dispatch: any) {
 
 class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, {}> {
     private swipeDelay: number = 0;
-    private readonly swipeDelayMax: number = 4;
+    private readonly swipeDelayMax: number = 2;
     private swipeAction: number;
 
     componentDidMount() {
