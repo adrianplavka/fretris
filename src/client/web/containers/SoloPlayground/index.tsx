@@ -29,6 +29,8 @@ function mapDispatchToProps(dispatch: any) {
 
 class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, {}> {
     private swipeDelay: number = 0;
+    private readonly swipeDelayMax: number = 4;
+    private swipeAction: number;
 
     componentDidMount() {
         const game = new Tetris();
@@ -40,21 +42,32 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, {}> 
         mc.add(new Hammer.Tap());
 
         mc.on('pan', (ev) => {
-            if (this.swipeDelay >= 10) {
-                switch (ev.direction) {
-                    case Hammer.DIRECTION_LEFT:
+            switch (ev.direction) {
+                case Hammer.DIRECTION_LEFT:
+                    if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_LEFT) {
                         game.moveLeft();
-                        break;
-                    case Hammer.DIRECTION_RIGHT:
+                        this.swipeDelay = 0;
+                    }
+                    this.swipeAction = Hammer.DIRECTION_LEFT;
+                    this.swipeDelay++;
+                    break;
+                case Hammer.DIRECTION_RIGHT:
+                    if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_RIGHT) {
                         game.moveRight();
-                        break;
-                    default:
+                        this.swipeDelay = 0;
+                    }
+                    this.swipeAction = Hammer.DIRECTION_RIGHT;
+                    this.swipeDelay++;
+                    break;
+                default:
+                    if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_DOWN) {
                         game.moveDown();
-                        break;
-                }
-                this.swipeDelay = 0;
+                        this.swipeDelay = 0;
+                    }
+                    this.swipeAction = Hammer.DIRECTION_DOWN;
+                    this.swipeDelay++;
+                    break;
             }
-            this.swipeDelay++;
         });
 
         mc.on('tap', (ev) => {
