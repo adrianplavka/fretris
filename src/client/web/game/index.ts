@@ -617,6 +617,46 @@ export class SoloGame {
         }
     }
 
+    public moveLeft() {
+        var points: Point[] = [];
+        if (this.phase == SoloGame.gameState.playing) {
+            points = this.currentShape.moveLeft();
+        }
+        if (this.grid.isPosValid(points)) {
+            this.currentShape.setPos(points);
+        }
+    }
+
+    public moveRight() {
+        var points: Point[] = [];
+        if (this.phase == SoloGame.gameState.playing) {
+            points = this.currentShape.moveRight();
+        }
+        if (this.grid.isPosValid(points)) {
+            this.currentShape.setPos(points);
+        }
+    }
+
+    public rotate() {
+        var points: Point[] = [];
+        if (this.phase == SoloGame.gameState.playing) {
+            points = this.currentShape.rotate(true);
+        }
+        if (this.grid.isPosValid(points)) {
+            this.currentShape.setPos(points);
+        }
+    }
+
+    public moveDown() {
+        var points: Point[] = [];
+        if (this.phase == SoloGame.gameState.playing) {
+            points = this.currentShape.drop();
+            if (this.grid.isPosValid(points)) {
+                this.currentShape.setPos(points);
+            }
+        }
+    }
+
     private togglePause() {
         if (this.phase == SoloGame.gameState.paused) {
             this.phase = SoloGame.gameState.playing;

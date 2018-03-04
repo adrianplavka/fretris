@@ -1,6 +1,7 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
+import * as Hammer from 'hammerjs';
 
 import { SoloGame as Tetris } from '../../game/index';
 import { RootState } from '../../reducers/store';
@@ -30,6 +31,29 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, {}> 
     componentDidMount() {
         const game = new Tetris();
         game.newGame();
+
+        // Setup swipe gestures.
+        var mc = new Hammer.Manager(document.getElementById("root"), {});
+        mc.add(new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, threshold: 10, posThreshold: 300 }));
+        mc.add(new Hammer.Tap());
+
+        mc.on('pan', (ev) => {
+            switch (ev.direction) {
+                case Hammer.DIRECTION_LEFT:
+                    game.moveLeft();
+                    break;
+                case Hammer.DIRECTION_RIGHT:
+                    game.moveRight();
+                    break;
+                default:
+                    game.moveDown();
+                    break;
+            }
+        });
+
+        mc.on('tap', (ev) => {
+            game.rotate();
+        });
     }
 
     render() {
