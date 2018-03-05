@@ -576,30 +576,16 @@ export class SoloGame {
         if (this.phase == SoloGame.gameState.playing) {
             switch (event.keyCode) {
                 case 39: // right
-                    points = this.currentShape.moveRight();
+                    this.moveRight();
                     break;
                 case 37: // left
-                    points = this.currentShape.moveLeft();
+                    this.moveLeft();
                     break;
                 case 38: // up arrow
-                    points = this.currentShape.rotate(true);
+                    this.rotate();
                     break;
                 case 40: // down arrow
-                    // erase ourself first
-                    points = this.currentShape.drop();
-                    if (this.grid.isPosValid(points)) {
-                        this.currentShape.setPos(points);
-                    }
-                    break;
-            }
-
-            switch (event.keyCode) {
-                case 39: // right
-                case 37: // left
-                case 38: // up
-                    if (this.grid.isPosValid(points)) {
-                        this.currentShape.setPos(points);
-                    }
+                    this.moveDown();
                     break;
             }
         }
@@ -621,9 +607,10 @@ export class SoloGame {
         var points: Point[] = [];
         if (this.phase == SoloGame.gameState.playing) {
             points = this.currentShape.moveLeft();
-        }
-        if (this.grid.isPosValid(points)) {
-            this.currentShape.setPos(points);
+
+            if (this.grid.isPosValid(points)) {
+                this.currentShape.setPos(points);
+            }
         }
     }
 
@@ -631,9 +618,10 @@ export class SoloGame {
         var points: Point[] = [];
         if (this.phase == SoloGame.gameState.playing) {
             points = this.currentShape.moveRight();
-        }
-        if (this.grid.isPosValid(points)) {
-            this.currentShape.setPos(points);
+
+            if (this.grid.isPosValid(points)) {
+                this.currentShape.setPos(points);
+            }
         }
     }
 
@@ -641,9 +629,15 @@ export class SoloGame {
         var points: Point[] = [];
         if (this.phase == SoloGame.gameState.playing) {
             points = this.currentShape.rotate(true);
-        }
-        if (this.grid.isPosValid(points)) {
-            this.currentShape.setPos(points);
+
+            if (this.grid.isPosValid(points)) {
+                this.currentShape.setPos(points);
+
+                clearTimeout(this.timerToken);
+                this.timerToken = window.setInterval((function (self) {
+                    return function () { self.gameTimer(); };
+                })(this), this.speed);
+            }
         }
     }
 
@@ -653,6 +647,11 @@ export class SoloGame {
             points = this.currentShape.drop();
             if (this.grid.isPosValid(points)) {
                 this.currentShape.setPos(points);
+
+                clearTimeout(this.timerToken);
+                this.timerToken = window.setInterval((function (self) {
+                    return function () { self.gameTimer(); };
+                })(this), this.speed);
             }
         }
     }

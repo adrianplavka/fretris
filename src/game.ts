@@ -451,20 +451,42 @@ export class GameNamespace {
                     switch (move) {
                         case "right":
                             points = this.games[sck.id].currentShape.moveRight();
+                            if (this.games[sck.id].grid.isPosValid(points)) {
+                                this.games[sck.id].currentShape.setPos(points);
+                                io.emit("move", move, sck.id);
+                            }
                             break;
                         case "left":
                             points = this.games[sck.id].currentShape.moveLeft();
+                            if (this.games[sck.id].grid.isPosValid(points)) {
+                                this.games[sck.id].currentShape.setPos(points);
+                                io.emit("move", move, sck.id);
+                            }
                             break;
                         case "up":
                             points = this.games[sck.id].currentShape.rotate(true);
+                            if (this.games[sck.id].grid.isPosValid(points)) {
+                                this.games[sck.id].currentShape.setPos(points);
+
+                                clearTimeout(this.games[sck.id].timerToken);
+                                setInterval(() => {
+                                    this.games[sck.id].gameTimer();
+                                }, this.games[sck.id].speed);
+                                io.emit("move", move, sck.id);
+                            }
                             break;
                         case "down":
                             points = this.games[sck.id].currentShape.drop();
+                            if (this.games[sck.id].grid.isPosValid(points)) {
+                                this.games[sck.id].currentShape.setPos(points);
+
+                                clearTimeout(this.games[sck.id].timerToken);
+                                setInterval(() => {
+                                    this.games[sck.id].gameTimer();
+                                }, this.games[sck.id].speed);
+                                io.emit("move", move, sck.id);
+                            }
                             break;
-                    }
-                    if (this.games[sck.id].grid.isPosValid(points)) {
-                        this.games[sck.id].currentShape.setPos(points);
-                        io.emit("move", move, sck.id);
                     }
                 }
             });
