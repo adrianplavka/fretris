@@ -632,11 +632,6 @@ export class SoloGame {
 
             if (this.grid.isPosValid(points)) {
                 this.currentShape.setPos(points);
-
-                clearTimeout(this.timerToken);
-                this.timerToken = window.setInterval((function (self) {
-                    return function () { self.gameTimer(); };
-                })(this), this.speed);
             }
         }
     }
@@ -647,11 +642,6 @@ export class SoloGame {
             points = this.currentShape.drop();
             if (this.grid.isPosValid(points)) {
                 this.currentShape.setPos(points);
-
-                clearTimeout(this.timerToken);
-                this.timerToken = window.setInterval((function (self) {
-                    return function () { self.gameTimer(); };
-                })(this), this.speed);
             }
         }
     }

@@ -562,10 +562,6 @@ class GameNamespace {
                             points = this.games[sck.id].currentShape.rotate(true);
                             if (this.games[sck.id].grid.isPosValid(points)) {
                                 this.games[sck.id].currentShape.setPos(points);
-                                clearTimeout(this.games[sck.id].timerToken);
-                                setInterval(() => {
-                                    this.games[sck.id].gameTimer();
-                                }, this.games[sck.id].speed);
                                 io.emit("move", move, sck.id);
                             }
                             break;
@@ -573,10 +569,6 @@ class GameNamespace {
                             points = this.games[sck.id].currentShape.drop();
                             if (this.games[sck.id].grid.isPosValid(points)) {
                                 this.games[sck.id].currentShape.setPos(points);
-                                clearTimeout(this.games[sck.id].timerToken);
-                                setInterval(() => {
-                                    this.games[sck.id].gameTimer();
-                                }, this.games[sck.id].speed);
                                 io.emit("move", move, sck.id);
                             }
                             break;
