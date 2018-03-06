@@ -5,6 +5,8 @@ import * as Hammer from 'hammerjs';
 
 import { SoloGame as Tetris } from '../../game/index';
 import { RootState } from '../../reducers/store';
+import { isMobile } from '../../utils';
+
 import './styles.css';
 
 namespace SoloPlayground {
@@ -14,6 +16,10 @@ namespace SoloPlayground {
     }
 
     export type Props = StateProps;
+
+    export interface State {
+        tetrisNotify: JSX.Element;
+    }
 }
 
 function mapStateToProps(state: RootState) {
@@ -27,52 +33,23 @@ function mapDispatchToProps(dispatch: any) {
     return {};
 }
 
-class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, {}> {
+class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, SoloPlayground.State> {
+    private game: Tetris;
     private swipeDelay: number = 0;
     private readonly swipeDelayMax: number = 3;
     private swipeAction: number;
 
+    constructor(props: SoloPlayground.Props) {
+        super(props);
+        this.tetrisNotify = this.tetrisNotify.bind(this);
+
+        this.state = { tetrisNotify: null };
+    }
+
     componentDidMount() {
-        const game = new Tetris();
-        game.newGame();
-
-        // Setup swipe gestures.
-        var mc = new Hammer.Manager(document.getElementById("root"), {});
-        mc.add(new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, threshold: 10, posThreshold: 300 }));
-        mc.add(new Hammer.Tap());
-
-        mc.on('pan', (ev) => {
-            switch (ev.direction) {
-                case Hammer.DIRECTION_LEFT:
-                    if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_LEFT) {
-                        game.moveLeft();
-                        this.swipeDelay = 0;
-                    }
-                    this.swipeAction = Hammer.DIRECTION_LEFT;
-                    this.swipeDelay++;
-                    break;
-                case Hammer.DIRECTION_RIGHT:
-                    if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_RIGHT) {
-                        game.moveRight();
-                        this.swipeDelay = 0;
-                    }
-                    this.swipeAction = Hammer.DIRECTION_RIGHT;
-                    this.swipeDelay++;
-                    break;
-                default:
-                    if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_DOWN) {
-                        game.moveDown();
-                        this.swipeDelay = 0;
-                    }
-                    this.swipeAction = Hammer.DIRECTION_DOWN;
-                    this.swipeDelay++;
-                    break;
-            }
-        });
-
-        mc.on('tap', (ev) => {
-            game.rotate();
-        });
+        this.game = new Tetris(this.tetrisNotify);
+        this.game.newGame();
+        this.setupSwipe();
     }
 
     render() {
@@ -96,8 +73,68 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, {}> 
                         </div>
                     </div>
                 </div>
+                {this.state.tetrisNotify}
             </div>
         );
+    }
+
+    setupSwipe() {
+        if (isMobile()) {
+            var mc = new Hammer.Manager(document.getElementById("root"), {});
+            mc.add(new Hammer.Pan({ 
+                direction: Hammer.DIRECTION_ALL, 
+                threshold: 10, 
+                posThreshold: 300 
+            }));
+            mc.add(new Hammer.Tap());
+
+            mc.on('pan', (ev) => {
+                switch (ev.direction) {
+                    case Hammer.DIRECTION_LEFT:
+                        if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_LEFT) {
+                            this.game.moveLeft();
+                            this.swipeDelay = 0;
+                        }
+                        this.swipeAction = Hammer.DIRECTION_LEFT;
+                        this.swipeDelay++;
+                        break;
+                    case Hammer.DIRECTION_RIGHT:
+                        if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_RIGHT) {
+                            this.game.moveRight();
+                            this.swipeDelay = 0;
+                        }
+                        this.swipeAction = Hammer.DIRECTION_RIGHT;
+                        this.swipeDelay++;
+                        break;
+                    default:
+                        if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_DOWN) {
+                            this.game.moveDown();
+                            this.swipeDelay = 0;
+                        }
+                        this.swipeAction = Hammer.DIRECTION_DOWN;
+                        this.swipeDelay++;
+                        break;
+                }
+            });
+
+            mc.on('tap', (ev) => {
+                this.game.rotate();
+            });
+        }
+    }
+
+    tetrisNotify() {
+        this.setState({ 
+            ...this.state, 
+            tetrisNotify:
+                <div className="playground-notify animated fadeOut"><p>Fretris!</p></div>
+        });
+        setTimeout(() => {
+            this.setState({
+                ...this.state,
+                tetrisNotify: null
+            });
+        }, 1500);
     }
 }
 

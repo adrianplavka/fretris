@@ -274,8 +274,9 @@ export class Grid {
     public backColor: any;
     private xOffset: number;
     private yOffset: number;
+    private tetrisNotifyCb: () => void;
 
-    constructor(rows: number, cols: number, blockSize: number, backColor: string | CanvasGradient, canvas: HTMLCanvasElement) {
+    constructor(rows: number, cols: number, blockSize: number, backColor: string | CanvasGradient, canvas: HTMLCanvasElement, tetrisNotifyCb?: () => void) {
         this.canvas = canvas;
         this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
         this.blockSize = blockSize;
@@ -288,6 +289,7 @@ export class Grid {
         }
         this.xOffset = 20;
         this.yOffset = 20;
+        this.tetrisNotifyCb = tetrisNotifyCb;
     }
 
     public draw(shape: Shape) {
@@ -422,6 +424,10 @@ export class Grid {
         }
 
         if (rowsRemoved > 0) {
+            // Tetris notification, when four rows were removed in one go.
+            if (rowsRemoved === 4) {
+                this.tetrisNotifyCb();
+            }
             this.eraseGrid();
             this.paint();
         }
@@ -448,12 +454,13 @@ export class SoloGame {
     private timerToken: number;
     private pausedImage: HTMLImageElement;
     private randomShapes: string[] = [];
+    private tetrisNotifyCb: () => void;
 
-    constructor() {
+    constructor(tetrisNotifyCb: () => void) {
         this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
         this.nextCanvas = document.getElementById('nextCanvas') as HTMLCanvasElement;
         this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
-        this.grid = new Grid(16, 10, 20, '#f5f5f5', this.canvas);
+        this.grid = new Grid(16, 10, 20, '#f5f5f5', this.canvas, tetrisNotifyCb);
         this.nextGrid = new Grid(16, 10, 20, '#f5f5f5', this.nextCanvas);
         this.grid.eraseGrid();
         this.nextGrid.eraseGrid();
@@ -461,6 +468,8 @@ export class SoloGame {
         var x = this;
         this.keyhandler = this.keyhandler.bind(this);
         document.onkeydown = this.keyhandler;
+
+        this.tetrisNotifyCb = tetrisNotifyCb;
     }
 
     private draw() {
@@ -576,15 +585,20 @@ export class SoloGame {
         if (this.phase == SoloGame.gameState.playing) {
             switch (event.keyCode) {
                 case 39: // right
+                case 68: // D
                     this.moveRight();
                     break;
                 case 37: // left
+                case 65: // A
                     this.moveLeft();
                     break;
                 case 38: // up arrow
+                case 87: // W
+                case 32: // spacebar
                     this.rotate();
                     break;
                 case 40: // down arrow
+                case 83: // S
                     this.moveDown();
                     break;
             }
@@ -757,8 +771,9 @@ export class DuoGame {
     public score: number;
     public socket: SocketIOClient.Socket;
     public mine: bool;
+    private tetrisNotifyCb: () => void;
 
-    constructor(socket: SocketIOClient.Socket, mine: bool) {
+    constructor(socket: SocketIOClient.Socket, mine: bool, tetrisNotifyCb: () => void) {
         this.socket = socket;
         this.mine = mine;
         if (this.mine) {
@@ -769,7 +784,7 @@ export class DuoGame {
             this.nextCanvas = document.getElementById('nextCanvas') as HTMLCanvasElement;
         }
         this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
-        this.grid = new Grid(16, 10, 20, '#f5f5f5', this.canvas);
+        this.grid = new Grid(16, 10, 20, '#f5f5f5', this.canvas, tetrisNotifyCb);
         this.nextGrid = new Grid(16, 10, 20, '#f5f5f5', this.nextCanvas);
         this.grid.eraseGrid();
         this.nextGrid.eraseGrid();
@@ -778,6 +793,7 @@ export class DuoGame {
         if (mine) {
             document.onkeydown = this.keyhandler;
         }
+        this.tetrisNotifyCb = tetrisNotifyCb;
     }
 
     public shapeFinished(shape: string) {
@@ -890,15 +906,20 @@ export class DuoGame {
         if (this.phase == DuoGame.gameState.playing) {
             switch (event.keyCode) {
                 case 39: // right
+                case 68: // D
                     this.socket.emit("move", "right");
                     break;
                 case 37: // left
+                case 65: // A
                     this.socket.emit("move", "left");
                     break;
                 case 38: // up arrow
+                case 87: // W
+                case 32: // spacebar
                     this.socket.emit("move", "up");
                     break;
                 case 40: // down arrow
+                case 83: // S
                     this.socket.emit("move", "down");
                     break;
             }

@@ -57,6 +57,24 @@
     color: #8d1818;
 }
 
+.playground-notify {
+    position: absolute;
+    display: flex;
+    animation-duration: 1.5s;
+}
+
+.playground-notify p {
+    font-family: 'Lobster', sans-serif;
+    background-image: -webkit-gradient( linear, left top, right top, color-stop(0, #0fb8ad), color-stop(0.5, #1fc8db), color-stop(1, #2cb5e8));
+    background-image: gradient( linear, left top, right top, color-stop(0, #0fb8ad), color-stop(0.5, #1fc8db), color-stop(1, #2cb5e8));
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: white;
+    font-size: 70px;
+}
+
 /* Low Resolution Tablets, Mobiles (Landscape) */
 @media screen and (min-width: 481px) and (max-width: 767px) {
     #solo-playground {
