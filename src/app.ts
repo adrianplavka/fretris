@@ -15,18 +15,9 @@ app.use(Express.static("src/client/web/.dist/"));
 
 // Serve the index page.
 app.get("/", (req, res) => {
-    res.format({
-        html: () => {
-            res.status(200).sendFile(
-                `${process.cwd()}/src/client/web/.dist/`
-            );
-        },
-        default: () => {
-            res.status(406).send({
-                error: "This route responses with HTML only."
-            })
-        }
-    });
+    res.status(200).sendFile(
+        `${process.cwd()}/src/client/web/.dist/`
+    );
 });
 
 export const players: Map<str, str> = new Map();

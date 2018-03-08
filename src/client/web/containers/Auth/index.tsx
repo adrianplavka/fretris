@@ -49,28 +49,46 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
         this.onChangeUsername = this.onChangeUsername.bind(this);
         this.onChangeID = this.onChangeID.bind(this);
         this.submitEventListener = this.submitEventListener.bind(this);
+        document.addEventListener("keydown", this.submitEventListener, false);
     }
 
     private async submit() {
+        // While the button is disabled, don't submit.
+        if (this.state.disabled) return;
+        // Otherwise, disable until finished.
+        this.setState({
+            ...this.state,
+            disabled: true
+        });
+
         if (this.state.context === CONTEXT_PLAYGROUND_SOLO) {
             this.props.toSolo();
         } else {
             if (this.usernameValue.length === 0) return;
+
             if (this.state.duoContext === "join" && this.idValue === "") return;
+
+            // If the intent is to join a room.
             if (this.state.duoContext === "join") {
-                this.setState({ ...this.state, disabled: true });
-                connection.sck.emit("check room", this.idValue);
-                connection.sck.once("check room", (check: bool) => {
-                    if (check) this.props.toDuo(this.usernameValue, this.idValue)
-                    else this.setState({ ...this.state, disabled: false });
+                connection.sck.once("check room", (available: bool) => {
+                    if (available) {
+                        this.props.toDuo(this.usernameValue, this.idValue)
+                    }
                 });
+                connection.sck.emit("check room", this.idValue);
+            // If the intent is to create a room.
             } else {
-                connection.sck.emit("create room", connection.sck.id);
                 connection.sck.once("create room", (id: string) => {
                     this.props.toDuo(this.usernameValue, id);
                 });
+                connection.sck.emit("create room", connection.sck.id);
             }
         }
+        
+        this.setState({
+            ...this.state,
+            disabled: false
+        });
     }
 
     private switch(e: any) {
@@ -101,16 +119,14 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
 
     private submitEventListener(e: any) {
         // On ENTER keypress, trigger a submit.
-        if (this.state.disabled) {
-            return;
-        } else if (e.which === 13 || e.keyCode === 13) {
+        if (e.which === 13 || e.keyCode === 13) {
             this.submit();
         }
     }
 
     render() {
         return (
-            <div className="container animated fadeIn" onKeyPress={this.submitEventListener}>
+            <div className="container animated fadeIn">
                 <h1 className="auth-title animated infinite pulse">
                     Fretris!
                 </h1>
@@ -175,6 +191,10 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
                 <footer><i className="fa fa-code" aria-hidden="true" /> with <i className="fa fa-heart" aria-hidden="true" /> for the boys, who were there for me.</footer>
             </div>
         );
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener("keydown", this.submitEventListener, false);
     }
 }
 

@@ -42,14 +42,15 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, Solo
 
     constructor(props: SoloPlayground.Props) {
         super(props);
-        this.tetrisNotify = this.tetrisNotify.bind(this);
-
         this.state = { tetrisNotify: null };
+
+        this.tetrisNotify = this.tetrisNotify.bind(this);
     }
 
     componentDidMount() {
         this.game = new Tetris(this.tetrisNotify);
         this.game.newGame();
+        
         this.setupSwipe();
     }
 
@@ -110,6 +111,8 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, Solo
                         }
                         this.swipeAction = Hammer.DIRECTION_RIGHT;
                         this.swipeDelay++;
+                        break;
+                    case Hammer.DIRECTION_UP:
                         break;
                     default:
                         if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_DOWN) {

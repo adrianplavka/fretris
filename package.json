@@ -1,7 +1,7 @@
 {
   "name": "fretris",
   "version": "1.0.0",
-  "description": "Play Tetris with your friends!",
+  "description": "tetris",
   "main": "index.js",
   "keywords": [
     "git",
@@ -69,7 +69,7 @@
     "jest-enzyme": "^4.0.0",
     "nodemon-webpack-plugin": "^0.1.4",
     "raf": "^3.3.2",
-    "react-test-renderer": "16",
+    "react-test-renderer": "^16.2.0",
     "style-loader": "^0.18.2",
     "superagent": "^3.6.2",
     "supertest": "^3.0.0",

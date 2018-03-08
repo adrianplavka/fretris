@@ -81,16 +81,7 @@ exports.io = socket(exports.server);
 exports.app.use(Express.static("src/client/web/.dist/"));
 // Serve the index page.
 exports.app.get("/", (req, res) => {
-    res.format({
-        html: () => {
-            res.status(200).sendFile(`${process.cwd()}/src/client/web/.dist/`);
-        },
-        default: () => {
-            res.status(406).send({
-                error: "This route responses with HTML only."
-            });
-        }
-    });
+    res.status(200).sendFile(`${process.cwd()}/src/client/web/.dist/`);
 });
 exports.players = new Map();
 const games = new Map();
@@ -136,7 +127,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __webpack_require__(0);
 const port = 8000;
 app_1.server.listen(process.env.PORT || port);
-console.clear() || console.log("<Tetris Online> @ Index > Started on port", port);
+console.log("<Tetris Online> @ Index > Started on port", port);
 
 
 /***/ }),

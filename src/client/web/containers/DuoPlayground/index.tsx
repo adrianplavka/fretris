@@ -62,6 +62,7 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
             myTetrisNotify: null, 
             otherTetrisNotify: null 
         };
+
         this.connection = new GameConnection(this.props.id);
         this.myTetrisNotify = this.myTetrisNotify.bind(this);
         this.otherTetrisNotify = this.otherTetrisNotify.bind(this);
@@ -196,6 +197,8 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
                         }
                         this.swipeAction = Hammer.DIRECTION_RIGHT;
                         this.swipeDelay++;
+                        break;
+                    case Hammer.DIRECTION_UP:
                         break;
                     default:
                         if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_DOWN) {
