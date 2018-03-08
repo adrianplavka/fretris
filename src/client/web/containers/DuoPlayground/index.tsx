@@ -18,7 +18,6 @@ namespace DuoPlayground {
     }
 
     export interface StateProps {
-        score: number;
         pause: bool;
     }
 
@@ -34,7 +33,6 @@ namespace DuoPlayground {
 
 function mapStateToProps(state: RootState) {
     return {
-        score: state.playground.score,
         pause: state.playground.pause
     };
 }
