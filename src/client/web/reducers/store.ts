@@ -5,7 +5,6 @@ import { createLogger } from 'redux-logger';
 import { AppState, AppReducer, AppInitialState } from './app';
 import { PlaygroundState, PlaygroundReducer, PlaygroundInitialState } from './playground';
 
-
 import { isDevMode } from '../utils/dev';
 
 export interface RootState {

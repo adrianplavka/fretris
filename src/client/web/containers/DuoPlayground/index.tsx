@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { GameConnection } from '../../network';
+import * as Hammer from 'hammerjs';
 
 import { setScore, setPause } from '../../actions/playground';
 import { store } from '../../index';
@@ -51,6 +52,7 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
     private swipeDelay: number = 0;
     private readonly swipeDelayMax: number = 3;
     private swipeAction: number;
+    private mc: HammerManager;
 
     constructor(props: DuoPlayground.Props) {
         super(props);
@@ -167,16 +169,17 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
     }
 
     componentWillUnmount() {
+        this.mc.destroy();
         this.connection.sck.disconnect();
     }
 
     setupSwipe() {
         if (isMobile()) {
-            var mc = new Hammer.Manager(document.getElementById("root"), {});
-            mc.add(new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, threshold: 10, posThreshold: 300 }));
-            mc.add(new Hammer.Tap());
+            this.mc = new Hammer.Manager(document.getElementById("root"), {});
+            this.mc.add(new Hammer.Pan({ direction: Hammer.DIRECTION_ALL, threshold: 10, posThreshold: 300 }));
+            this.mc.add(new Hammer.Tap());
 
-            mc.on('pan', (ev) => {
+            this.mc.on('pan', (ev) => {
                 switch (ev.direction) {
                     case Hammer.DIRECTION_LEFT:
                         if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_LEFT) {
@@ -205,7 +208,7 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
                 }
             });
 
-            mc.on('tap', (ev) => {
+            this.mc.on('tap', (ev) => {
                 this.connection.sck.emit("move", "up");
             });
         }
@@ -215,7 +218,7 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
         this.setState({ 
             ...this.state, 
             myTetrisNotify:
-                <div className="playground-notify animated fadeOut"><p>Fretris!</p></div>
+                <div className="animated playground-notify"><p unselectable>Fretris!</p></div>
         });
         setTimeout(() => {
             this.setState({
@@ -229,7 +232,7 @@ class DuoPlaygroundComponent extends React.Component<DuoPlayground.Props, DuoPla
         this.setState({ 
             ...this.state, 
             otherTetrisNotify:
-                <div className="playground-notify animated fadeOut"><p>Fretris!</p></div>
+                <div className="animated playground-notify"><p unselectable>Fretris!</p></div>
         });
         setTimeout(() => {
             this.setState({

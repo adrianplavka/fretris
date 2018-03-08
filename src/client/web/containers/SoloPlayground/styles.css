@@ -60,7 +60,9 @@
 .playground-notify {
     position: absolute;
     display: flex;
-    animation-duration: 1.5s;
+    animation-duration: 1, 1.5;
+    animation-name: zoomIn, fadeOut;
+    -webkit-animation-name: zoomIn, fadeOut;
 }
 
 .playground-notify p {
@@ -72,6 +74,10 @@
     background-clip: text;
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: white;
+    -webkit-user-select: none;      
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     font-size: 70px;
 }
 

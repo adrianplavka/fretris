@@ -38,6 +38,7 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, Solo
     private swipeDelay: number = 0;
     private readonly swipeDelayMax: number = 3;
     private swipeAction: number;
+    private mc: HammerManager;
 
     constructor(props: SoloPlayground.Props) {
         super(props);
@@ -78,17 +79,21 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, Solo
         );
     }
 
+    componentWillUnmount() {
+        this.mc.destroy();
+    }
+
     setupSwipe() {
         if (isMobile()) {
-            var mc = new Hammer.Manager(document.getElementById("root"), {});
-            mc.add(new Hammer.Pan({ 
+            this.mc = new Hammer.Manager(document.getElementById("root"), {});
+            this.mc.add(new Hammer.Pan({ 
                 direction: Hammer.DIRECTION_ALL, 
                 threshold: 10, 
                 posThreshold: 300 
             }));
-            mc.add(new Hammer.Tap());
+            this.mc.add(new Hammer.Tap());
 
-            mc.on('pan', (ev) => {
+            this.mc.on('pan', (ev) => {
                 switch (ev.direction) {
                     case Hammer.DIRECTION_LEFT:
                         if (this.swipeDelay >= this.swipeDelayMax && this.swipeAction == Hammer.DIRECTION_LEFT) {
@@ -117,7 +122,7 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, Solo
                 }
             });
 
-            mc.on('tap', (ev) => {
+            this.mc.on('tap', (ev) => {
                 this.game.rotate();
             });
         }
@@ -127,7 +132,7 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, Solo
         this.setState({ 
             ...this.state, 
             tetrisNotify:
-                <div className="playground-notify animated fadeOut"><p>Fretris!</p></div>
+                <div className="animated playground-notify"><p unselectable>Fretris!</p></div>
         });
         setTimeout(() => {
             this.setState({
