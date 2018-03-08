@@ -467,7 +467,7 @@ export class SoloGame {
         this.speed = 1000;
         var x = this;
         this.keyhandler = this.keyhandler.bind(this);
-        document.onkeydown = this.keyhandler;
+        document.addEventListener("keydown", this.keyhandler);
 
         this.tetrisNotifyCb = tetrisNotifyCb;
     }
@@ -504,6 +504,12 @@ export class SoloGame {
             return function () { self.draw(); };
         })(this));
         this.incrementLevel(); // will start the game timer & update the labels
+    }
+
+    public cancel() {
+        window.clearInterval(this.timerToken);
+        document.removeEventListener("keydown", this.keyhandler);
+        requestAnimationFrame((self) => {});
     }
 
     public showNextShape() {

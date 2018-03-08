@@ -14,7 +14,7 @@ export const io = socket(server);
 app.use(Express.static("src/client/web/.dist/"));
 
 // Serve the index page.
-app.get("/", (req, res) => {
+app.get("*", (req, res) => {
     res.status(200).sendFile(
         `${process.cwd()}/src/client/web/.dist/`
     );

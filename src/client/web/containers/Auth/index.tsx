@@ -1,6 +1,7 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import { connection } from '../../index';
 import { CONTEXT_PLAYGROUND_SOLO, CONTEXT_PLAYGROUND_DUO } from '../../actions/app';
@@ -13,14 +14,10 @@ namespace Auth {
         disabled: bool;
         context: str;
         duoContext: str;
+        redirection: JSX.Element; 
     }
 
-    export interface DispatchProps {
-        toSolo: () => void;
-        toDuo: (username: str, id?: str) => void;
-    }
-
-    export type Props = OwnProps & DispatchProps;
+    export type Props = OwnProps & RouteComponentProps<{}>;
 }
 
 function mapStateToProps(state: any) {
@@ -28,10 +25,7 @@ function mapStateToProps(state: any) {
 }
 
 function mapDispatchToProps(dispatch: any) {
-    return {
-        toSolo: () => { dispatch({ type: CONTEXT_PLAYGROUND_SOLO }) },
-        toDuo: (username: str, id?: str) => { dispatch({ type: CONTEXT_PLAYGROUND_DUO, payload: { username, id } }) }
-    }
+    return {}
 }
 
 export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
@@ -40,7 +34,13 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
 
     constructor(props: Auth.Props) {
         super(props);
-        this.state = { disabled: false, context: CONTEXT_PLAYGROUND_SOLO, duoContext: "join" };
+        this.state = { 
+            disabled: false, 
+            context: CONTEXT_PLAYGROUND_SOLO, 
+            duoContext: "join", 
+            redirection: null 
+        };
+
         this.usernameValue = "";
         this.idValue = "";
         this.submit = this.submit.bind(this);
@@ -62,7 +62,12 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
         });
 
         if (this.state.context === CONTEXT_PLAYGROUND_SOLO) {
-            this.props.toSolo();
+            this.setState({
+                ...this.state,
+                disabled: false,
+                redirection: <Redirect to="/g/" push exact />
+            });
+            return;
         } else {
             if (this.usernameValue.length === 0) return;
 
@@ -72,23 +77,31 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
             if (this.state.duoContext === "join") {
                 connection.sck.once("check room", (available: bool) => {
                     if (available) {
-                        this.props.toDuo(this.usernameValue, this.idValue)
+                        this.setState({
+                            ...this.state,
+                            disabled: false,
+                            redirection: <Redirect to={"/g/" + this.idValue + "/"} exact />
+                        });
+                    } else {
+                        this.setState({
+                            ...this.state,
+                            disabled: false
+                        });
                     }
                 });
                 connection.sck.emit("check room", this.idValue);
             // If the intent is to create a room.
             } else {
                 connection.sck.once("create room", (id: string) => {
-                    this.props.toDuo(this.usernameValue, id);
+                    this.setState({
+                        ...this.state,
+                        disabled: false,
+                        redirection: <Redirect to={"/g/" + id + "/"} exact />
+                    });
                 });
                 connection.sck.emit("create room", connection.sck.id);
             }
         }
-        
-        this.setState({
-            ...this.state,
-            disabled: false
-        });
     }
 
     private switch(e: any) {
@@ -189,6 +202,7 @@ export class AuthComponent extends React.Component<Auth.Props, Auth.State> {
                     Play!
                 </button>
                 <footer><i className="fa fa-code" aria-hidden="true" /> with <i className="fa fa-heart" aria-hidden="true" /> for the boys, who were there for me.</footer>
+                {this.state.redirection}
             </div>
         );
     }

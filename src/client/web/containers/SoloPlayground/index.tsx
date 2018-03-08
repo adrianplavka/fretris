@@ -50,8 +50,8 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, Solo
     componentDidMount() {
         this.game = new Tetris(this.tetrisNotify);
         this.game.newGame();
-        
-        this.setupSwipe();
+
+        this.mountSwipe();
     }
 
     render() {
@@ -81,10 +81,11 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, Solo
     }
 
     componentWillUnmount() {
-        this.mc.destroy();
+        this.game.cancel();
+        this.unmountSwipe();
     }
 
-    setupSwipe() {
+    mountSwipe() {
         if (isMobile()) {
             this.mc = new Hammer.Manager(document.getElementById("root"), {});
             this.mc.add(new Hammer.Pan({ 
@@ -128,6 +129,12 @@ class SoloPlaygroundComponent extends React.Component<SoloPlayground.Props, Solo
             this.mc.on('tap', (ev) => {
                 this.game.rotate();
             });
+        }
+    }
+
+    unmountSwipe() {
+        if (isMobile()) {
+            this.mc.destroy();
         }
     }
 
