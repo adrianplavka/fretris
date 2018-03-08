@@ -425,7 +425,7 @@ export class Grid {
 
         if (rowsRemoved > 0) {
             // Tetris notification, when four rows were removed in one go.
-            if (rowsRemoved >= 1) {
+            if (rowsRemoved === 4) {
                 this.tetrisNotifyCb();
             }
             this.eraseGrid();
