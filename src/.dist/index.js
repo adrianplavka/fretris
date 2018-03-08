@@ -79,6 +79,9 @@ exports.server = http.createServer(exports.app);
 exports.io = socket(exports.server);
 // Serve static files.
 exports.app.use(Express.static("src/client/web/.dist/"));
+exports.app.get("*/bundle.js", (req, res) => {
+    res.status(200).sendFile(`${process.cwd()}/src/client/web/.dist/`);
+});
 // Serve the index page.
 exports.app.get("*", (req, res) => {
     res.status(200).sendFile(`${process.cwd()}/src/client/web/.dist/`);
