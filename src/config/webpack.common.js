@@ -14,9 +14,12 @@ module.exports = {
         extensions: ['.ts', '.js'],
     },
     module: {
-        loaders: [{
+        rules: [{
             test: /\.ts$/,
-            exclude: ['node_modules', 'src/client'],
+            exclude: [
+                path.resolve(__dirname, 'node_modules'), 
+                path.resolve(__dirname, 'src/client')
+            ],
             loader: 'ts-loader'
         }]
     }

@@ -5,6 +5,7 @@ const nodemonPlugin = require('nodemon-webpack-plugin');
 const common = require('./webpack.common.js');
 
 module.exports = merge(common, {
+    mode: 'development',
     plugins: [
         new nodemonPlugin({
             watch: "src/.dist",
