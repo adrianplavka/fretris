@@ -476,6 +476,15 @@ export class SoloGame {
         if (this.phase == SoloGame.gameState.playing) {
             this.grid.paint();
             this.grid.draw(this.currentShape);
+
+            const shadowShape: Shape = _.cloneDeep(this.currentShape);
+            shadowShape.fillColor += "50";
+
+            while (this.grid.isPosValid(shadowShape.drop())) {
+                shadowShape.setPos(shadowShape.drop());
+            }
+            this.grid.draw(shadowShape);
+
             // recursive render loop
             requestAnimFrame((function (self) {
                 return function () { self.draw(); };
@@ -509,7 +518,7 @@ export class SoloGame {
     public cancel() {
         window.clearInterval(this.timerToken);
         document.removeEventListener("keydown", this.keyhandler);
-        requestAnimationFrame((self) => {});
+        requestAnimationFrame((self) => { });
     }
 
     public showNextShape() {
